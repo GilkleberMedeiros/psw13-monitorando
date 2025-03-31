@@ -3,6 +3,8 @@ from django.http.response import HttpResponse
 from django.core.exceptions import ValidationError
 from django.contrib.messages import constants
 from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib import auth
 
 from .models import Usuario
 
@@ -17,7 +19,11 @@ def cadastro(request):
         password_confirm = request.POST.get("confirmar_senha")
 
         if password != password_confirm:
-            messages.add_message(request, constants.ERROR, "Senhas diferentes!")
+            messages.add_message(
+                request, 
+                constants.ERROR, 
+                "Os dados no campo senha e confirmar senha devem ser iguais!"
+            )
             return redirect("cadastro")
         
         if len(password) < 6:
@@ -35,6 +41,24 @@ def cadastro(request):
         
         Usuario.objects.create_user(username=username, password=password)
 
-        return HttpResponse(f"POST request para {request.path}")
+        return redirect("login")
     
+    return HttpResponse("Método HTTP não aceito.")
+
+def login(request):
+    if request.method == "GET":
+        return render(request, "login.html")
+    elif request.method == "POST":
+        username = request.POST.get("username")
+        senha = request.POST.get("senha")
+
+        user = authenticate(username=username, password=senha)
+
+        if user is not None:
+            auth.login(request, user)
+            return HttpResponse(f"Usuário {user.username} logado!")
+        
+        messages.add_message(request, constants.ERROR, "Usuário ou senha inválidos!")
+        return redirect("login")
+
     return HttpResponse("Método HTTP não aceito.")

@@ -56,7 +56,7 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            return HttpResponse(f"Usuário {user.username} logado!")
+            return redirect("mentorados")
         
         messages.add_message(request, constants.ERROR, "Usuário ou senha inválidos!")
         return redirect("login")

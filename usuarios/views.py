@@ -1,3 +1,40 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http.response import HttpResponse
+from django.core.exceptions import ValidationError
+from django.contrib.messages import constants
+from django.contrib import messages
+
+from .models import Usuario
+
 
 # Create your views here.
+def cadastro(request):
+    if request.method == "GET":
+        return render(request, "cadastro.html")
+    elif request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("senha")
+        password_confirm = request.POST.get("confirmar_senha")
+
+        if password != password_confirm:
+            messages.add_message(request, constants.ERROR, "Senhas diferentes!")
+            return redirect("cadastro")
+        
+        if len(password) < 6:
+            messages.add_message(request, constants.ERROR, "A senha deve ter 6 ou mais caracteres!")
+            return redirect("cadastro")
+        
+        usuario = Usuario(username=username, password=password)
+
+        try:
+            usuario.full_clean()
+        except ValidationError as e:
+            print(e.message_dict)
+            [ messages.add_message(request, constants.ERROR, f"{v}") for k, v in e.message_dict.items() ]
+            return redirect("cadastro")
+        
+        Usuario.objects.create_user(username=username, password=password)
+
+        return HttpResponse(f"POST request para {request.path}")
+    
+    return HttpResponse("Método HTTP não aceito.")

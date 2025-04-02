@@ -102,4 +102,26 @@ def reunioes(request):
     
     return HttpResponse("Método HTTP não aceito.")
 
-    pass
+def auth_mentorado(request):
+    if request.method == "GET":
+        return render(request, "auth_mentorado.html")
+    elif request.method == "POST":
+        token = request.POST.get("token")
+
+        mentorado = Mentorados.objects.filter(token=token)
+        
+        if not mentorado.exists():
+            messages.add_message(
+                request, 
+                constants.ERROR, 
+                "Token inválido! Não existe nenhum mentorado com esse token cadastrado."
+            )
+            return redirect("auth_mentorado")
+        
+        response = redirect("escolher_dia")
+        response.headers["auth_token"] = token
+
+        return response
+        ...
+
+    return HttpResponse("Método HTTP não aceito.")

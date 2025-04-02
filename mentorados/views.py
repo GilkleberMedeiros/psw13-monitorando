@@ -67,6 +67,7 @@ def mentorados(request):
     
     return HttpResponse("Método Http não aceito.")
 
+@login_required(login_url="login")
 def reunioes(request):
     if request.method == "GET":
         horarios = DisponibilidadeHorario.objects.filter(mentor=request.user)

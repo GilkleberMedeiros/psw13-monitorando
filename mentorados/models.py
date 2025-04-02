@@ -1,5 +1,7 @@
 from django.db import models
 
+from datetime import timedelta
+
 from usuarios.models import Usuario
 
 
@@ -28,3 +30,12 @@ class Mentorados(models.Model):
 
     def __str__(self):
         return self.nome
+    
+class DisponibilidadeHorario(models.Model):
+    data_inicial = models.DateTimeField(null=True, blank=True)
+    mentor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    agendado = models.BooleanField(default=False)
+
+    @property
+    def data_final(self):
+        return self.data_incial + timedelta(minutes=50)

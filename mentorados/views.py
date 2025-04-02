@@ -5,7 +5,9 @@ from django.contrib.messages import constants
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 
-from .models import Mentorados, Navigators
+from datetime import datetime, timedelta
+
+from .models import Mentorados, Navigators, DisponibilidadeHorario
 
 
 # Create your views here.
@@ -17,6 +19,7 @@ def mentorados(request):
         navigators = Navigators.objects.filter(mentor=logged_user.id)
         mentorados = Mentorados.objects.filter(mentor=logged_user)
 
+        # Carregando dados do gráfico
         qtd_estagios = []
         estagios = []
         for i, j in Mentorados.estagio_choices:
@@ -63,3 +66,39 @@ def mentorados(request):
         return redirect("mentorados")
     
     return HttpResponse("Método Http não aceito.")
+
+def reunioes(request):
+    if request.method == "GET":
+        horarios = DisponibilidadeHorario.objects.filter(mentor=request.user)
+
+        return render(request, "reunioes.html")
+    elif request.method == "POST":
+        data = request.POST["data"]
+        data = datetime.strptime(data, r"%Y-%m-%dT%H:%M")
+
+        horarios = DisponibilidadeHorario.objects.filter(mentor=request.user).filter(
+            data_inicial__gte=(data - timedelta(minutes=50)), 
+            data_inicial__lte=(data + timedelta(minutes=50)),
+        )
+
+        # Verifica se já existe um reunião que acontecerá no horário desejado
+        if horarios.exists():
+            messages.add_message(
+                request, 
+                constants.ERROR, 
+                "Você já possui outro horário agendado!"
+            )
+            return redirect("reunioes")
+
+        disponibilidade = DisponibilidadeHorario(
+            data_inicial=data,
+            mentor=request.user,
+        )
+        disponibilidade.save()
+
+        messages.add_message(request, constants.SUCCESS, "Horário agendado com sucesso.")
+        return redirect("reunioes")
+    
+    return HttpResponse("Método HTTP não aceito.")
+
+    pass

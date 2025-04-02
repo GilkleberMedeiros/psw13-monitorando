@@ -57,7 +57,7 @@ def mentorados(request):
             mentorado.full_clean()
         except ValidationError as e:
             errors = [v for v in e.message_dict.values() ]
-            messages.add_message(request, level=constants.ERRROR, message=f"{errors}")
+            messages.add_message(request, level=constants.ERROR, message=f"{errors}")
             return redirect("mentorados")
 
         mentorado.save()

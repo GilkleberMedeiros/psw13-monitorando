@@ -77,12 +77,14 @@ def reunioes(request):
         data = request.POST["data"]
         data = datetime.strptime(data, r"%Y-%m-%dT%H:%M")
 
+        duracao_reuniao = DisponibilidadeHorario.duracao_reuniao
+
         horarios = DisponibilidadeHorario.objects.filter(mentor=request.user).filter(
-            data_inicial__gte=(data - timedelta(minutes=50)), 
-            data_inicial__lte=(data + timedelta(minutes=50)),
+            data_inicial__gte=(data - timedelta(minutes=duracao_reuniao)), 
+            data_inicial__lte=(data + timedelta(minutes=duracao_reuniao)),
         )
 
-        # Verifica se já existe um reunião que acontecerá no horário desejado
+        # Verifica se já existe uma reunião que acontecerá no horário desejado
         if horarios.exists():
             messages.add_message(
                 request, 
@@ -150,7 +152,6 @@ def escolher_dia(request):
             else:
                 conjunto.add(horarios[i]["date"])
                 i += 1
-
 
         return render(request, "escolher_dia.html", context={"horarios": horarios})
 

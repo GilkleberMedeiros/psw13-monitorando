@@ -57,10 +57,11 @@ class Mentorados(models.Model):
     
 
 class DisponibilidadeHorario(models.Model):
+    duracao_reuniao = 50 # Duração da reunião em minutos
     data_inicial = models.DateTimeField(null=True, blank=True)
     mentor = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     agendado = models.BooleanField(default=False)
 
     @property
     def data_final(self):
-        return self.data_incial + timedelta(minutes=50)
+        return self.data_incial + timedelta(minutes=self.duracao_reuniao)

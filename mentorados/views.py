@@ -119,9 +119,39 @@ def auth_mentorado(request):
             return redirect("auth_mentorado")
         
         response = redirect("escolher_dia")
-        response.headers["auth_token"] = token
+        response.set_cookie("auth_token", token, max_age=3600)
 
         return response
-        ...
+
+    return HttpResponse("Método HTTP não aceito.")
+
+def escolher_dia(request):
+    if request.method == "GET":
+        token = request.COOKIES.get("auth_token")
+        mentorado = Mentorados.objects.filter(token=token).first()
+
+        if mentorado is None:
+            messages.add_message(request, constants.ERROR, "Token inválido.")
+            return redirect("auth_mentorado")
+
+        mentor = mentorado.mentor
+        horarios = DisponibilidadeHorario.objects.filter(mentor=mentor).filter(
+            data_inicial__gt=datetime.now(), 
+            agendado=False
+        ).values_list("data_inicial", flat=True)
+        horarios = list(map(lambda i: {"datetime": i, "date": i.strftime(r"%d/%m/%Y")}, horarios))
+
+        # Deixa os dados únicos
+        conjunto = set()
+        i = 0
+        while i < len(horarios):
+            if horarios[i]["date"] in conjunto:
+                horarios.pop(i)
+            else:
+                conjunto.add(horarios[i]["date"])
+                i += 1
+
+
+        return render(request, "escolher_dia.html", context={"horarios": horarios})
 
     return HttpResponse("Método HTTP não aceito.")

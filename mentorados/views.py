@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
 
 from .models import Mentorados, Navigators, DisponibilidadeHorario
+from .auth import auth_mentorado_token_required, valida_token
 
 
 # Create your views here.
@@ -129,8 +130,7 @@ def auth_mentorado(request):
 
 def escolher_dia(request):
     if request.method == "GET":
-        token = request.COOKIES.get("auth_token")
-        mentorado = Mentorados.objects.filter(token=token).first()
+        mentorado = valida_token(request, "auth_token")
 
         if mentorado is None:
             messages.add_message(request, constants.ERROR, "Token inválido.")

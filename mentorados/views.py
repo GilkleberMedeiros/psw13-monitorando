@@ -89,7 +89,7 @@ def reunioes(request):
             messages.add_message(
                 request, 
                 constants.ERROR, 
-                "Você já possui outro horário agendado!"
+                "Você já possui outra reunião nesse horário!"
             )
             return redirect("reunioes")
 

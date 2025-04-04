@@ -5,6 +5,7 @@ from django.contrib.messages import constants
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http.request import HttpRequest
+from django.views.decorators.csrf import csrf_exempt
 
 from datetime import datetime, timedelta
 
@@ -249,3 +250,44 @@ def tarefa(request: HttpRequest, id: int):
 
     return HttpResponse("Método HTTP não aceito.")
 
+@auth_mentorado_token_required(redirect_to="auth_mentorado")
+def tarefas_mentorados(request: HttpRequest, id: int):
+    mentorado = valida_token(request)
+
+    if mentorado is None or mentorado.id != id:
+        messages.add_message(request, constants.ERROR, "Mentorado selecionado não é o mesmo mentorado logado.")
+        return redirect("auth_mentorado")
+    
+    if request.method == "GET":
+        tarefas = Tarefa.objects.filter(mentorado_id=mentorado.id)
+        videos = Video.objects.filter(mentorado_id=mentorado.id)
+
+        return render(request, "tarefas_mentorado.html", context={
+            "mentorado": mentorado,
+            "tarefas": tarefas,
+            "videos": videos,
+        })
+
+    return HttpResponse("Método HTTP não aceito.")
+
+@csrf_exempt
+def marcar_tarefa(request: HttpRequest, id: int):
+    mentorado = valida_token(request)
+
+    try:
+        tarefa = Tarefa.objects.get(id=id)
+    except:
+        messages.add_message(request, constants.ERROR, "Tarefa não existe.")
+        return redirect("tarefas_mentorado")
+
+    if mentorado is None or mentorado.id != tarefa.mentorado.id:
+        messages.add_message(request, constants.ERROR, "Tarefa não pertence ao mentorado logado.")
+        return redirect("auth_mentorado")
+    
+    if request.method == "POST":
+        tarefa.realizada = not tarefa.realizada
+        tarefa.save()
+
+        return redirect(f"/mentorados/tarefas_mentorado/{mentorado.id}/")
+    
+    return HttpResponse("Método HTTP não aceito.")

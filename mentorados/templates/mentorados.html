@@ -149,7 +149,9 @@
                     <td class="py-4 pl-4 pr-8 sm:pl-6 lg:pl-8">
                       <div class="flex items-center gap-x-4">
                         <img src="{{mentorado.foto.url}}" alt="" class="size-8 rounded-full bg-gray-800">
-                        <div class="truncate text-sm/6 font-medium text-white">{{mentorado.nome}}</div>
+                        <div class="truncate text-sm/6 font-medium text-white">
+                          <a class="hover:underline underline-offset-2" href="{% url 'tarefa' id=mentorado.id %}">{{mentorado.nome}}</a>
+                        </div>
                       </div>
                     </td>
                     <td class="hidden py-4 pl-0 pr-4 sm:table-cell sm:pr-8">

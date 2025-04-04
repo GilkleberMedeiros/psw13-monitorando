@@ -4,10 +4,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages import constants
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.http.request import HttpRequest
 
 from datetime import datetime, timedelta
 
-from .models import Mentorados, Navigators, DisponibilidadeHorario, Reuniao
+from .models import (
+    Mentorados, 
+    Navigators, 
+    DisponibilidadeHorario, 
+    Reuniao,
+    Tarefa,
+    Video,
+)
 from .auth import auth_mentorado_token_required, valida_token
 
 
@@ -203,3 +211,41 @@ def agendar_reuniao(request):
         return redirect("escolher_dia")
 
     return HttpResponse("Método HTTP não aceito.")
+
+@login_required(login_url="login")
+def tarefa(request: HttpRequest, id: int):
+    try:
+        mentorado = Mentorados.objects.get(id=id)
+    except:
+        messages.add_message(request, constants.ERROR, "Mentorado não encontrado.")
+        return redirect("mentorados")
+    
+    # validando se mentorado selecionado é do mentor usuário.
+    if mentorado.mentor != request.user:
+        messages.add_message(request, constants.ERROR, "Mentorado selecionado não encontrado.")
+        return redirect("mentorados")
+
+    if request.method == "GET":
+        tarefas = Tarefa.objects.filter(mentorado=mentorado)
+        videos = Video.objects.filter(mentorado=mentorado)
+
+        return render(request, "tarefa.html", context={
+            "mentorado": mentorado, 
+            "tarefas": tarefas, 
+            "videos": videos
+        })
+
+    elif request.method == "POST":
+        tarefa = request.POST.get("tarefa")
+        video = request.FILES.get("video")
+
+        if tarefa is not None:
+            Tarefa(mentorado=mentorado, tarefa=tarefa).save()
+        
+        if video is not None:
+            Video(mentorado=mentorado, video=video).save()
+        
+        return redirect(f"/mentorados/tarefa/{mentorado.id}/")
+
+    return HttpResponse("Método HTTP não aceito.")
+

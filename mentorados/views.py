@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from datetime import datetime, timedelta
 
-from .models import Mentorados, Navigators, DisponibilidadeHorario
+from .models import Mentorados, Navigators, DisponibilidadeHorario, Reuniao
 from .auth import auth_mentorado_token_required, valida_token
 
 
@@ -154,5 +154,52 @@ def escolher_dia(request):
                 i += 1
 
         return render(request, "escolher_dia.html", context={"horarios": horarios})
+
+    return HttpResponse("Método HTTP não aceito.")
+
+@auth_mentorado_token_required(redirect_to="auth_mentorado")
+def agendar_reuniao(request):
+    mentorado = valida_token(request) # Pega mentorado
+
+    if request.method == "GET":
+        data = request.GET.get("data")
+        data = datetime.strptime(data, r"%d/%m/%Y")
+
+        # Pega todos os horários que tem a data especificada.
+        horarios = DisponibilidadeHorario.objects.filter(
+            data_inicial__gte=data,
+            data_inicial__lt=(data + timedelta(days=1)),
+            mentor=mentorado.mentor,
+        )
+
+        return render(
+            request, 
+            "agendar_reuniao.html", 
+            context={"horarios": horarios, "tags": Reuniao.tag_choices}
+        )
+    elif request.method == "POST": 
+        horario_id = request.POST.get("horario")
+        tag = request.POST.get("tag")
+        descricao = request.POST.get("descricao")
+
+        # Pega o model horario
+        try:
+            horario = DisponibilidadeHorario.objects.get(id=horario_id)
+        except Exception as e:
+            messages.add_message(request, constants.ERROR, "Horário não encontrado.")
+            return redirect("escolher_dia")
+
+        if horario.agendado or horario.mentor != mentorado.mentor:
+            messages.add_message(request, constants.ERROR, "O horário escolhido já está agendado.")
+            return redirect("escolher_dia")
+
+        reuniao = Reuniao(data=horario, mentorado=mentorado, tag=tag, descricao=descricao)
+
+        horario.agendado = True
+        horario.save()
+        reuniao.save()
+
+        messages.add_message(request, constants.SUCCESS, "Horário agendado com sucesso!")
+        return redirect("escolher_dia")
 
     return HttpResponse("Método HTTP não aceito.")

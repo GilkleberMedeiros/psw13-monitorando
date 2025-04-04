@@ -71,9 +71,9 @@ def mentorados(request):
 @login_required(login_url="login")
 def reunioes(request):
     if request.method == "GET":
-        horarios = DisponibilidadeHorario.objects.filter(mentor=request.user)
+        reunioes = Reuniao.objects.filter(data__mentor=request.user)
 
-        return render(request, "reunioes.html")
+        return render(request, "reunioes.html", context={"reunioes": reunioes})
     elif request.method == "POST":
         data = request.POST["data"]
         data = datetime.strptime(data, r"%Y-%m-%dT%H:%M")

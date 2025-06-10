@@ -27,7 +27,7 @@ Mentorando - Minhas tarefas
       </div>
       <div class="hidden lg:flex lg:gap-x-12">
         <a href="{% url 'mentorados' %}" class="text-sm/6 font-semibold text-gray-100">Mentorados</a>
-        <a href="{% url 'tarefas_mentorado' %}" class="text-sm/6 font-semibold text-gray-100">Tarefas</a>
+        <a href="{% url 'tarefas_mentorado' id=mentorado.id %}" class="text-sm/6 font-semibold text-gray-100">Tarefas</a>
         <a href="{% url 'escolher_dia' %}" class="text-sm/6 font-semibold text-gray-100">Reuniões</a>
       </div>
       <div class="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -67,19 +67,35 @@ Mentorando - Minhas tarefas
     </header>
     
     <div class="bg-[#05101d] min-h-screen">
-        <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-            <!-- Invoice summary -->
-            <div class="lg:col-start-3 lg:row-end-1 ">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div 
+          class="
+            mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 
+            lg:max-w-none lg:grid-cols-3 lg:grid-rows-[auto auto]
+          "
+        >
+          <!-- START - Card Token -->
+          <div class="
+            lg:row-end-2 lg:col-span-3 rounded-lg shadow-sm ring-1 ring-white/20 
+            bg-[#0b1526] p-4
+            "
+          >
+            <h2 class="font-semibold text-lg text-gray-100">Token de Acesso</h2>
+            <hr class="border-px border-slate-800">
+
+            <p class="mt-8 font-medium text-md text-gray-200">{{mentorado.token}}</p>
+          </div>
+          <!-- END - Card Token -->
+          
+          <!-- Invoice summary -->
+          <!-- START - Card de Reuniões -->
+          <div class="lg:col-start-3 lg:row-start-2 lg:row-end-3">
             <h2 class="sr-only">Summary</h2>
             <div class="rounded-lg shadow-sm ring-1 ring-white/20 bg-[#0b1526]">
                 <dl class="flex flex-wrap">
                 <div class="flex-auto px-6 pt-6">
                     <p class="text-sm/6 font-semibold text-indigo-200">Reuniões</p>
-                    
-                    
                 </div>
-                
                 
                 {% for video in videos %}
                   <div class="mt-6 flex w-full flex-none gap-x-4 border-t border-gray-50/10 px-6 py-6">
@@ -90,7 +106,10 @@ Mentorando - Minhas tarefas
                         
                         
                       </dt>
-                      <dd class="text-sm/6 font-medium text-blue-400"><a href="{{video.video.url}}">{{video.mentorado}}</a></dd><p class="text-sm/6 text-white">10 - 5</p>
+                      <dd class="text-sm/6 font-medium text-blue-400">
+                        <a href="{{video.video.url}}">{{video.mentorado}}</a>
+                      </dd>
+                      <p class="text-sm/6 text-white">10 - 5</p>
                   </div>
                 {% endfor %}
                 
@@ -98,41 +117,57 @@ Mentorando - Minhas tarefas
                 
                 
             </div>
-            </div>
-    
-            <!-- Invoice -->
-            <div class="-mx-4 px-4 py-8 shadow-sm  sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16 ring-1 ring-white/20 bg-[#0b1526]">
-                <h2 class="mt-4 text-2xl/9 font-bold tracking-tight text-gray-100">Tarefas do mentorado</h2>
-                <hr class="border-px border-slate-800">
+          </div>
+          <!-- END - Card de reuniões -->
+  
+          <!-- Invoice -->
+          <!-- START - Card de tarefas do mentorado -->
+          <div 
+            class="
+              -mx-4 px-4 py-8 shadow-sm sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 
+              lg:row-span-1 lg:row-start-2 xl:px-16 xl:pb-20 xl:pt-16 ring-1 ring-white/20 
+              bg-[#0b1526]
+              "
+          >
+            <h2 class="mt-4 text-2xl/9 font-bold tracking-tight text-gray-100">
+              Tarefas do mentorado
+            </h2>
+            <hr class="border-px border-slate-800">
+            
+            <div class="grid grid-cols-4 gap-5 mt-4">
                 
-                <div class="grid grid-cols-4 gap-5 mt-4">
-                   
-                      
-                </div>
-                <br>
-                
-                {% for tarefa in tarefas %} 
-                  <div class="flex items-center mb-4">
-                      <input 
-                        id="tarefa-checkbox-{{tarefa.id}}" 
-                        type="checkbox" 
-                        {% if tarefa.realizada %}checked{% endif %} 
-                        class="
-                          w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 
-                          rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 
-                          dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 
-                          dark:border-gray-600
-                        "
-                        hx-post="{% url 'marcar_tarefa' id=tarefa.id %}"
-                        hx-trigger="click"
-                      >
-                      <label for="tarefa-checkbox-{{tarefa.id}}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{tarefa.tarefa}}</label>
-                  </div>
-                {% endfor %}
+                  
             </div>
-            </div>
+            <br>
+            
+            {% for tarefa in tarefas %} 
+              <div class="flex items-center mb-4">
+                  <input 
+                    id="tarefa-checkbox-{{tarefa.id}}" 
+                    type="checkbox" 
+                    {% if tarefa.realizada %}checked{% endif %} 
+                    class="
+                      w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 
+                      rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 
+                      dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 
+                      dark:border-gray-600
+                    "
+                    hx-post="{% url 'marcar_tarefa' id=tarefa.id %}"
+                    hx-trigger="click"
+                  >
+                  <label 
+                    for="tarefa-checkbox-{{tarefa.id}}" 
+                    class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  >
+                    {{tarefa.tarefa}}
+                  </label>
+              </div>
+            {% endfor %}
+          </div>
+          <!-- END - Card tarefas -->
+          </div>
         </div>
-        </div>
+      </div>
     </div>
   </main>
  

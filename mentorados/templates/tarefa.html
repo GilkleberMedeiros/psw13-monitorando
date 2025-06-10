@@ -63,10 +63,24 @@ Monitorando - Tarefas mentorados
     </header>
     
     <div class="bg-[#05101d] min-h-screen">
-        <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-            <!-- Invoice summary -->
-            <div class="lg:col-start-3 lg:row-end-1 ">
+          <!-- START - Card Token -->
+          <div class="
+            lg:row-end-2 lg:col-span-3 rounded-lg shadow-sm ring-1 ring-white/20 
+            bg-[#0b1526] p-4
+            "
+          >
+            <h2 class="font-semibold text-lg text-gray-100">Token de Acesso</h2>
+            <hr class="border-px border-slate-800">
+
+            <p class="mt-8 font-medium text-md text-gray-200">{{mentorado.token}}</p>
+          </div>
+          <!-- END - Card Token -->
+            
+          <!-- Invoice summary -->
+          <!-- START - Card Reuniões -->
+          <div class="lg:col-start-3 lg:row-start-2 lg:row-end-3">
             <h2 class="sr-only">Summary</h2>
             <div class="rounded-lg shadow-sm ring-1 ring-white/20 bg-[#0b1526]">
                 <dl class="flex flex-wrap">
@@ -81,9 +95,7 @@ Monitorando - Tarefas mentorados
                             <button type="submit" class="flex w-full justify-center cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Entrar</button>
                           </form>
                         </div>
-
                     </div>
-                    
                 </div>
                 
                 
@@ -106,46 +118,49 @@ Monitorando - Tarefas mentorados
                       <dd class="text-sm/6 font-medium text-blue-400"><a href="{{video.video.url}}">{{video.mentorado}}</a></dd><p class="text-sm/6 text-white">10 - 5</p>
                   </div>
                 {% endfor %}
-                
-                
-                
-                
             </div>
-            </div>
-    
-            <!-- Invoice -->
-            <div class="-mx-4 px-4 py-8 shadow-sm  sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 lg:row-span-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16 ring-1 ring-white/20 bg-[#0b1526]">
-                <h2 class="mt-4 text-2xl/9 font-bold tracking-tight text-gray-100">Tarefas do mentorado</h2>
-                <hr class="border-px border-slate-800">
-                
-                <div class="grid grid-cols-4 gap-5 mt-4">
-                   
-                    <form action="{% url 'tarefa' id=mentorado.id %}" method="POST">
-                    <div class="col-span-3">
-                        {% csrf_token %}
-                          <input type="text" name="tarefa" autocomplete="email" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Tarefas...">
-                      </div>
-                      <div>
-                          <button type="submit" class="flex w-full justify-center cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Entrar</button>
-                      </div>
-                    </form>
+          </div>
+          <!-- END - Card Reuniões -->
+
+          <!-- Invoice -->
+          <!-- Start - Card Tarefas -->
+          <div 
+            class="
+              -mx-4 px-4 py-8 shadow-sm  sm:mx-0 sm:rounded-lg sm:px-8 sm:pb-14 lg:col-span-2 
+              lg:row-span-2 lg:row-span-1 lg:row-start-2 lg:row-end-2 xl:px-16 xl:pb-20 xl:pt-16 
+              ring-1 ring-white/20 bg-[#0b1526]
+            "
+          >
+            <h2 class="mt-4 text-2xl/9 font-bold tracking-tight text-gray-100">Tarefas do mentorado</h2>
+            <hr class="border-px border-slate-800">
+            
+            <div class="mt-4">
+              <form 
+                class="flex gap-2"
+                action="{% url 'tarefa' id=mentorado.id %}" 
+                method="POST"
+              >
+                <div class="col-span-3">
+                  {% csrf_token %}
+                    <input type="text" name="tarefa" autocomplete="email" required class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" placeholder="Tarefas...">
                 </div>
-                <br>
-                
-                {% for tarefa in tarefas %} 
-                  <div class="flex items-center mb-4">
-                      <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                      <label for="default-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{tarefa.tarefa}}</label>
-                  </div>
-                {% endfor %}
+                <div>
+                    <button type="submit" class="flex w-full justify-center cursor-pointer rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Entrar</button>
+                </div>
+              </form>
             </div>
-    
+            <br>
             
-    
-            
-            </div>
+            {% for tarefa in tarefas %} 
+              <div class="flex items-center mb-4">
+                <input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                <label for="default-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{tarefa.tarefa}}</label>
+              </div>
+            {% endfor %}
+          </div>
+          <!-- END - Card Tarefas -->
         </div>
-        </div>
+      </div>
     </div>
   </main>
   

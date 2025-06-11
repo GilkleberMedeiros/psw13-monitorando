@@ -31,6 +31,19 @@
                 method="POST"
             >
                 {% csrf_token %}
+
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="rounded-md {{message.tags}} mt-4">
+                      <div class="flex">
+                          <div class="py-4 px-2">
+                              {{message}}
+                          </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
                 <input 
                     id="mentorButton"
                     type="radio" 

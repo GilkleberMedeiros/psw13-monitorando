@@ -130,7 +130,8 @@ def auth_mentorado(request):
             )
             return redirect("auth_mentorado")
         
-        response = redirect("escolher_dia")
+        mentorado = mentorado.get(token=token)
+        response = redirect("tarefas_mentorado", id=mentorado.id)
         response.set_cookie("auth_token", token, max_age=3600)
 
         return response

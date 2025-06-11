@@ -162,7 +162,7 @@ def escolher_dia(request):
                 conjunto.add(horarios[i]["date"])
                 i += 1
 
-        return render(request, "escolher_dia.html", context={"horarios": horarios})
+        return render(request, "escolher_dia.html", context={"horarios": horarios, "mentorado": mentorado})
 
     return HttpResponse("Método HTTP não aceito.")
 

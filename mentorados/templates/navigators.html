@@ -49,6 +49,19 @@ Monitorando - Navigators
             <div class="rounded-lg shadow-sm ring-1 ring-white/20 bg-[#0b1526]">
               <div class="flex-auto px-6 py-6">
                 <p class="text-sm/6 font-semibold text-indigo-200">Cadastrar Navigator</p>
+                
+                {% if messages %}
+                  {% for message in messages %}
+                    <div class="rounded-md {{message.tags}} mt-4">
+                      <div class="flex">
+                          <div class="ml-3 py-4">
+                              {{message}}
+                          </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+
                 <form action="" method="POST" class="mt-2 grid grid-cols-4 gap-2">
                   {% csrf_token %}
                   <input 

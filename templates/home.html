@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block "body" %}
+<script>
+    function submitForm() 
+    {
+        const form = document.getElementById("userRoleForm");
+        form.submit();
+    }
+</script>
+
+<div class="flex min-h-screen bg-slate-900">
+    <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+      <div class="mx-auto w-full max-w-sm lg:w-96">
+        <div>
+          <img class="h-15 w-auto" src="{% static 'logo.png' %}" alt="Your Company">
+          <h2 class="mt-4 text-2xl/9 font-bold tracking-tight text-gray-100">Você é um</h2>
+        </div>
+  
+        <div class="mt-12">
+            <form 
+                id="userRoleForm" 
+                class="flex flex-col gap-10 items-center" 
+                action="{% url 'home' %}" 
+                method="POST"
+            >
+                {% csrf_token %}
+                <input 
+                    id="mentorButton"
+                    type="radio" 
+                    name="role"
+                    value="mentor"
+                    hidden
+                    onclick="submitForm()"
+                />
+                <label 
+                    for="mentorButton"
+                    class="
+                        flex w-full justify-center cursor-pointer rounded-md bg-indigo-600 px-3 py-2 
+                        text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 
+                        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+                        focus-visible:outline-indigo-600
+                    "
+                >
+                    Mentor
+                </label>
+                <input 
+                    id="mentoradoButton"
+                    type="radio"
+                    name="role"
+                    value="mentorado"
+                    hidden
+                    onclick="submitForm()"
+                />
+                <label 
+                    for="mentoradoButton"~
+                    class="
+                        flex w-full justify-center cursor-pointer rounded-md bg-indigo-600 px-3 py-2 
+                        text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 
+                        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+                        focus-visible:outline-indigo-600
+                    "
+                >
+                    Mentorado
+                </label>
+            </form>
+  
+          
+        </div>
+      </div>
+    </div>
+    <div class="relative hidden w-0 flex-1 lg:block">
+      <img class="absolute inset-0 size-full object-cover" src="https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="">
+     
+    </div>
+  </div>
+
+{% endblock "body" %}

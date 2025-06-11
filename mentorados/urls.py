@@ -12,4 +12,5 @@ urlpatterns = [
     path("tarefa/<int:id>/", views.tarefa, name="tarefa"),
     path("tarefas_mentorado/<int:id>/", views.tarefas_mentorados, name="tarefas_mentorado"),
     path("marcar_tarefa/<int:id>/", views.marcar_tarefa, name="marcar_tarefa"),
+    path("navigators/", views.navigators, name="navigators"),
 ]

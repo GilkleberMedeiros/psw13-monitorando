@@ -292,3 +292,32 @@ def marcar_tarefa(request: HttpRequest, id: int):
         return redirect(f"/mentorados/tarefas_mentorado/{mentorado.id}/")
     
     return HttpResponse("Método HTTP não aceito.")
+
+@login_required(login_url="login")
+def navigators(request: HttpRequest) -> HttpResponse:
+    mentor = request.user
+    navs = Navigators.objects.all()
+    navs = navs.filter(mentor=mentor)
+
+    if request.method == "GET":
+        return render(request, "navigators.html", context={"navigators": navs})
+    
+    elif request.method == "POST":
+        nav_nome = request.POST.get("name", None)
+
+        if not nav_nome:
+            message="Não foi possível pegar o nome do navigator!"
+            messages.add_message(request, level=constants.ERROR, message=message)
+            return redirect("navigators")
+    
+        try: 
+            navigator = Navigators(nome=nav_nome, mentor=mentor)
+            navigator.save()
+        except Exception as error:
+            message = f"{error}"
+            messages.add_message(request, level=constants.ERROR, message=message)
+            return render(request, "navigators.html", context={"navigators": navs})
+
+        return redirect("navigators")
+    
+    return HttpResponse("Método HTTP não aceito.")

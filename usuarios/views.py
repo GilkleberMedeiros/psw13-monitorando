@@ -35,7 +35,6 @@ def cadastro(request):
         try:
             usuario.full_clean()
         except ValidationError as e:
-            print(e.message_dict)
             [ messages.add_message(request, constants.ERROR, f"{v}") for k, v in e.message_dict.items() ]
             return redirect("cadastro")
         

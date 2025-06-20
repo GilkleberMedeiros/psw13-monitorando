@@ -354,3 +354,36 @@ def deletar_tarefa(request: HttpRequest, tarefa_id: int) -> HttpResponse:
         return render(request, "pagina_erro_generico.html", context=on_error_context)
     
     return redirect("tarefa", id=mentorado.id)
+
+@login_required(login_url="login")
+def deletar_gravacao(request: HttpRequest, gravacao_id: int) -> HttpResponse:
+    mentor = request.user
+
+    try: 
+        gravacao = Video.objects.get(id=gravacao_id)
+    except:
+        url = reverse("mentorados")
+        contexto = { 
+            "erro": "Gravação não pôde ser encontrada para concluir a operação!", 
+            "tempo_redirect": 5, 
+            "redirect_url": url
+        }
+
+        return render(request, "pagina_erro_generico.html", context=contexto)
+    
+    mentorado = gravacao.mentorado
+
+    on_error_url = reverse("tarefa", kwargs={"id": mentorado.id})
+    on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
+
+    if mentorado.mentor != mentor:
+        on_error_context["erro"] = "O mentor logado não tem permissão sobre esse mentorado!"
+        return render(request, "pagina_erro_generico.html", context=on_error_context)
+    
+    try: 
+        gravacao.delete()
+    except Exception as err:
+        on_error_context["erro"] = "Devido à algum problema no banco de dados não foi possível deletar a gravação!"
+        return render(request, "pagina_erro_generico.html", context=on_error_context)
+    
+    return redirect("tarefa", id=mentorado.id)

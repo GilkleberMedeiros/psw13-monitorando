@@ -6,8 +6,10 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http.request import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
 from .models import (
     Mentorados, 
@@ -321,3 +323,34 @@ def navigators(request: HttpRequest) -> HttpResponse:
         return redirect("navigators")
     
     return HttpResponse("Método HTTP não aceito.")
+
+@login_required(login_url="login")
+def deletar_tarefa(request: HttpRequest, tarefa_id: int) -> HttpResponse:
+    mentor = request.user
+
+    try:
+        tarefa = Tarefa.objects.get(id=tarefa_id)
+    except Exception as err:
+        on_error_url = reverse("mentorados")
+        on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
+        on_error_context["erro"] = f"Não pôde encontrar a tarefa com id {tarefa_id}!"
+
+        return render(request, "pagina_erro_generico.html", context=on_error_context)
+    
+    mentorado = tarefa.mentorado
+
+    on_error_url = reverse("tarefa", kwargs={ "id": mentorado.id })
+    on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
+    
+    # Se mentorado não pertence ao mentor
+    if mentorado.mentor != mentor:
+        on_error_context["erro"] = "O mentorado informado não pertence ao mentor logado!"
+        return render(request, "pagina_erro_generico.html", context=on_error_context)
+    
+    try:
+        tarefa.delete()
+    except Exception as err:
+        on_error_context["erro"] = "Devido à algum erro no banco de dados, não foi possível apagar a tarefa!"
+        return render(request, "pagina_erro_generico.html", context=on_error_context)
+    
+    return redirect("tarefa", id=mentorado.id)

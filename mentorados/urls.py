@@ -7,7 +7,8 @@ from . import views
 urlpatterns = [
     path("", views.mentorados, name="mentorados"),
     path("reunioes/", views.reunioes, name="reunioes"),
-    path("auth_mentorado/", views.auth_mentorado, name="auth_mentorado"),
+    path("auth_mentorado/", views.auth_mentorado, name="auth_mentorado"), 
+    path("logout_mentorado/", views.logout_mentorado, name="logout_mentorado"), 
     path("escolher_dia/", views.escolher_dia, name="escolher_dia"),
     path("agendar_reuniao/", views.agendar_reuniao, name="agendar_reuniao"),
     path("tarefa/<int:id>/", views.tarefa, name="tarefa"),

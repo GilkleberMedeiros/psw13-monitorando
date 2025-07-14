@@ -140,6 +140,18 @@ def auth_mentorado(request):
 
     return HttpResponse("Método HTTP não aceito.")
 
+def logout_mentorado(request: HttpRequest) -> HttpResponse:
+    mentorado = valida_token(request, "auth_token") 
+
+    if mentorado is None:
+        messages.add_message(request, constants.ERROR, "Token inválido.")
+        return redirect("auth_mentorado")
+    
+    response = redirect("auth_mentorado")
+    response.set_cookie("auth_token", ".", -1) # Deletando Cookie de Autenticação
+
+    return response
+
 def escolher_dia(request):
     if request.method == "GET":
         mentorado = valida_token(request, "auth_token")

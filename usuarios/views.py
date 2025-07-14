@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
+from django.http.request import HttpRequest
 from django.core.exceptions import ValidationError
 from django.contrib.messages import constants
 from django.contrib import messages
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout as dj_logout
 from django.contrib import auth
 
 from .models import Usuario
@@ -61,3 +62,9 @@ def login(request):
         return redirect("login")
 
     return HttpResponse("Método HTTP não aceito.")
+
+def logout(request: HttpRequest) -> HttpResponse:
+    dj_logout(request)
+
+    return redirect("login")
+

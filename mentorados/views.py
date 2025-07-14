@@ -9,7 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
 from datetime import datetime, timedelta
-from urllib.parse import urljoin
 
 from .models import (
     Mentorados, 

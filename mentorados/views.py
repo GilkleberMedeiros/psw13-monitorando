@@ -1,18 +1,14 @@
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib.messages import constants
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.http.request import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse
 
 from datetime import datetime, timedelta
 
 from .models import (
     Mentorados, 
-    Navigators, 
     DisponibilidadeHorario, 
     Reuniao,
     Tarefa,
@@ -22,99 +18,6 @@ from .auth import auth_mentorado_token_required, valida_token
 
 
 # Create your views here.
-@login_required(login_url="login")
-def mentorados(request):
-    logged_user = request.user
-
-    if request.method == "GET":
-        navigators = Navigators.objects.filter(mentor=logged_user.id)
-        mentorados = Mentorados.objects.filter(mentor=logged_user)
-
-        # Carregando dados do gráfico
-        qtd_estagios = []
-        estagios = []
-        for i, j in Mentorados.estagio_choices:
-            x = mentorados.filter(estagio=i)
-            estagios.append(j)
-            qtd_estagios.append(x.count())
-
-        return render(
-            request, 
-            "mentorados.html", 
-            {
-                "estagios": Mentorados.estagio_choices, 
-                "navigators": navigators, 
-                "mentorados": mentorados,
-                "qtd_estagios": qtd_estagios,
-                "estagios_mentorados": estagios,
-            }
-        )
-    
-    elif request.method == "POST":
-        nome = request.POST.get("nome")
-        foto = request.FILES.get("foto")
-        estagio = request.POST.get("estagio")
-        navigator = request.POST.get("navigator", None)
-
-        mentorado = Mentorados(
-            nome=nome, 
-            foto=foto, 
-            estagio=estagio, 
-            navigator_id=navigator, 
-            mentor=logged_user
-        )
-
-        try:
-            mentorado.full_clean()
-        except ValidationError as e:
-            errors = [v for v in e.message_dict.values() ]
-            messages.add_message(request, level=constants.ERROR, message=f"{errors}")
-            return redirect("mentorados")
-
-        mentorado.save()
-
-        messages.add_message(request, level=constants.SUCCESS, message="Mentorado cadastrado com sucesso.")
-        return redirect("mentorados")
-    
-    return HttpResponse("Método Http não aceito.")
-
-@login_required(login_url="login")
-def reunioes(request):
-    if request.method == "GET":
-        reunioes = Reuniao.objects.filter(data__mentor=request.user)
-
-        return render(request, "reunioes.html", context={"reunioes": reunioes})
-    elif request.method == "POST":
-        data = request.POST["data"]
-        data = datetime.strptime(data, r"%Y-%m-%dT%H:%M")
-
-        duracao_reuniao = DisponibilidadeHorario.duracao_reuniao
-
-        horarios = DisponibilidadeHorario.objects.filter(mentor=request.user).filter(
-            data_inicial__gte=(data - timedelta(minutes=duracao_reuniao)), 
-            data_inicial__lte=(data + timedelta(minutes=duracao_reuniao)),
-        )
-
-        # Verifica se já existe uma reunião que acontecerá no horário desejado
-        if horarios.exists():
-            messages.add_message(
-                request, 
-                constants.ERROR, 
-                "Você já possui outra reunião nesse horário!"
-            )
-            return redirect("reunioes")
-
-        disponibilidade = DisponibilidadeHorario(
-            data_inicial=data,
-            mentor=request.user,
-        )
-        disponibilidade.save()
-
-        messages.add_message(request, constants.SUCCESS, "Horário agendado com sucesso.")
-        return redirect("reunioes")
-    
-    return HttpResponse("Método HTTP não aceito.")
-
 def auth_mentorado(request):
     if request.method == "GET":
         return render(request, "auth_mentorado.html")
@@ -227,43 +130,6 @@ def agendar_reuniao(request):
 
     return HttpResponse("Método HTTP não aceito.")
 
-@login_required(login_url="login")
-def tarefa(request: HttpRequest, id: int):
-    try:
-        mentorado = Mentorados.objects.get(id=id)
-    except:
-        messages.add_message(request, constants.ERROR, "Mentorado não encontrado.")
-        return redirect("mentorados")
-    
-    # validando se mentorado selecionado é do mentor usuário.
-    if mentorado.mentor != request.user:
-        messages.add_message(request, constants.ERROR, "Mentorado selecionado não encontrado.")
-        return redirect("mentorados")
-
-    if request.method == "GET":
-        tarefas = Tarefa.objects.filter(mentorado=mentorado)
-        videos = Video.objects.filter(mentorado=mentorado)
-
-        return render(request, "tarefa.html", context={
-            "mentorado": mentorado, 
-            "tarefas": tarefas, 
-            "videos": videos
-        })
-
-    elif request.method == "POST":
-        tarefa = request.POST.get("tarefa")
-        video = request.FILES.get("video")
-
-        if tarefa is not None:
-            Tarefa(mentorado=mentorado, tarefa=tarefa).save()
-        
-        if video is not None:
-            Video(mentorado=mentorado, video=video).save()
-        
-        return redirect(f"/mentorados/tarefa/{mentorado.id}/")
-
-    return HttpResponse("Método HTTP não aceito.")
-
 @auth_mentorado_token_required(redirect_to="auth_mentorado")
 def tarefas_mentorados(request: HttpRequest, id: int):
     mentorado = valida_token(request)
@@ -302,99 +168,7 @@ def marcar_tarefa(request: HttpRequest, id: int):
         tarefa.realizada = not tarefa.realizada
         tarefa.save()
 
-        return redirect(f"/mentorados/tarefas_mentorado/{mentorado.id}/")
+        return redirect("tarefas_mentorado", id=mentorado.id)
     
     return HttpResponse("Método HTTP não aceito.")
 
-@login_required(login_url="login")
-def navigators(request: HttpRequest) -> HttpResponse:
-    mentor = request.user
-    navs = Navigators.objects.all()
-    navs = navs.filter(mentor=mentor)
-
-    if request.method == "GET":
-        return render(request, "navigators.html", context={"navigators": navs})
-    
-    elif request.method == "POST":
-        nav_nome = request.POST.get("name", None)
-
-        if not nav_nome:
-            message="Não foi possível pegar o nome do navigator!"
-            messages.add_message(request, level=constants.ERROR, message=message)
-            return redirect("navigators")
-    
-        try: 
-            navigator = Navigators(nome=nav_nome, mentor=mentor)
-            navigator.save()
-        except Exception as error:
-            message = f"{error}"
-            messages.add_message(request, level=constants.ERROR, message=message)
-            return render(request, "navigators.html", context={"navigators": navs})
-
-        return redirect("navigators")
-    
-    return HttpResponse("Método HTTP não aceito.")
-
-@login_required(login_url="login")
-def deletar_tarefa(request: HttpRequest, tarefa_id: int) -> HttpResponse:
-    mentor = request.user
-
-    try:
-        tarefa = Tarefa.objects.get(id=tarefa_id)
-    except Exception as err:
-        on_error_url = reverse("mentorados")
-        on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
-        on_error_context["erro"] = f"Não pôde encontrar a tarefa com id {tarefa_id}!"
-
-        return render(request, "pagina_erro_generico.html", context=on_error_context)
-    
-    mentorado = tarefa.mentorado
-
-    on_error_url = reverse("tarefa", kwargs={ "id": mentorado.id })
-    on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
-    
-    # Se mentorado não pertence ao mentor
-    if mentorado.mentor != mentor:
-        on_error_context["erro"] = "O mentorado informado não pertence ao mentor logado!"
-        return render(request, "pagina_erro_generico.html", context=on_error_context)
-    
-    try:
-        tarefa.delete()
-    except Exception as err:
-        on_error_context["erro"] = "Devido à algum erro no banco de dados, não foi possível apagar a tarefa!"
-        return render(request, "pagina_erro_generico.html", context=on_error_context)
-    
-    return redirect("tarefa", id=mentorado.id)
-
-@login_required(login_url="login")
-def deletar_gravacao(request: HttpRequest, gravacao_id: int) -> HttpResponse:
-    mentor = request.user
-
-    try: 
-        gravacao = Video.objects.get(id=gravacao_id)
-    except:
-        url = reverse("mentorados")
-        contexto = { 
-            "erro": "Gravação não pôde ser encontrada para concluir a operação!", 
-            "tempo_redirect": 5, 
-            "redirect_url": url
-        }
-
-        return render(request, "pagina_erro_generico.html", context=contexto)
-    
-    mentorado = gravacao.mentorado
-
-    on_error_url = reverse("tarefa", kwargs={"id": mentorado.id})
-    on_error_context = { "tempo_redirect": 5, "redirect_url": on_error_url }
-
-    if mentorado.mentor != mentor:
-        on_error_context["erro"] = "O mentor logado não tem permissão sobre esse mentorado!"
-        return render(request, "pagina_erro_generico.html", context=on_error_context)
-    
-    try: 
-        gravacao.delete()
-    except Exception as err:
-        on_error_context["erro"] = "Devido à algum problema no banco de dados não foi possível deletar a gravação!"
-        return render(request, "pagina_erro_generico.html", context=on_error_context)
-    
-    return redirect("tarefa", id=mentorado.id)

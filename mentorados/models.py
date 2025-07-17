@@ -3,7 +3,7 @@ from django.db import models
 from datetime import timedelta
 from secrets import token_urlsafe
 
-from usuarios.models import Usuario
+from mentores.models import Usuario
 
 
 class Navigators(models.Model):

@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "usuarios",
+    "mentores",
     "mentorados",
 ]
 
@@ -85,7 +85,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "usuarios.Usuario"
+AUTH_USER_MODEL = "mentores.Usuario"
 
 
 # Password validation

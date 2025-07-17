@@ -4,6 +4,7 @@ from django.contrib.messages import constants
 from django.contrib import messages
 from django.http.request import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.db.transaction import atomic
 
 from datetime import datetime, timedelta
 
@@ -121,9 +122,18 @@ def agendar_reuniao(request):
 
         reuniao = Reuniao(data=horario, mentorado=mentorado, tag=tag, descricao=descricao)
 
-        horario.agendado = True
-        horario.save()
-        reuniao.save()
+        try:
+            horario.agendado = True
+            with atomic(using="default"): 
+                horario.save()
+                reuniao.save()
+        except Exception as _:
+            messages.add_message(
+                request, 
+                constants.ERROR, 
+                "Houve um erro no banco de dados e por isso a operação não pôde ser completada."
+            )
+            return redirect("escolher_dia")
 
         messages.add_message(request, constants.SUCCESS, "Horário agendado com sucesso!")
         return redirect("escolher_dia")

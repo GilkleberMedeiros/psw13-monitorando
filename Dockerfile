@@ -6,6 +6,6 @@ COPY . .
 
 RUN python3 -m pip install -r requirements.txt
 
-EXPOSE 80
+EXPOSE 8000
 
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:80"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "home.wsgi"]

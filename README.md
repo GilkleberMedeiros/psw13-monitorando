@@ -54,18 +54,28 @@ git clone https://github.com/GilkleberMedeiros/psw13-monitorando.git
 SECRET_KEY='RANDOM_DJANGO_SECRET_KEY'
 DEBUG=False # False para produção
 ALLOWED_HOSTS='.localhost, .127.0.0.1, .otherhost.com' 
-# Hosts separados por ', '.
+# Hosts separados por ', '
+CSRF_TRUSTED_ORIGINS='https://your-app-host-url.com, https://other-reliable-url.com'  
+# Hosts separados por ', '
+# Hosts de onde serão mandados requests para urls  
+# protegidas com CSRF da aplicação.
 ```
 
 3. Crie a imagem Docker e rode o container: 
 ```bash
-// Crie a imagem
+# Crie a imagem
 docker build --tag monitorando:tag .
 
-// Crie e rode o container 
-docker run --name monitorando --publish 80:8000 monitorando:tag 
+# Crie e rode o container 
+docker run --name monitorando --publish 80:80 monitorando:tag 
 ```
-e acesse em http://localhost
+e acesse localmente em http://localhost  
+Apartir daí você pode subir essa imagem no seu docker hub e deployar essa imagem no seu serviço de hospedagem favorito. 
+
+```bash
+# Use this command to upload your built image to docker hub
+docker push <yourDockerHubUsername>/<yourRepoName>:<tag>
+```
 
 #### Rodar em desenvolvimento 
 1. Clone o projeto: 
@@ -75,17 +85,17 @@ git clone https://github.com/GilkleberMedeiros/psw13-monitorando.git
 
 2. Instale e crie um ambiente virtual Python: 
 ```bash
-// Instale o virtualenv
+# Instale o virtualenv
 python -m pip install virtualenv
 
-// Crie um virtualenv
+# Crie um virtualenv
 python -m virtualenv venv .
 
-// Ative o virtualenv: 
-// Linux ou Mac
+# Ative o virtualenv: 
+# Linux ou Mac
 source venv/bin/activate 
 
-// Windows
+# Windows
 .\venv\Scripts\activate
 ```
 A linha do seu terminal deve indicar que o ambiente virtual foi ativado. No windows, por exemplo, vai parecer algo como: 
@@ -97,11 +107,17 @@ A linha do seu terminal deve indicar que o ambiente virtual foi ativado. No wind
 ```bash 
 pip install -r requirements.txt
 
-// ou no linux 
+# ou no linux 
 python3 -m pip install -r requirements.txt
 ``` 
 
-4. Rode o projeto em desenvolvimento: 
+4. Crie o arquivo .env na raiz do projeto: 
+```bash 
+# Apenas a secret key é necessária para rodar localmente.  
+SECRET_KEY='RANDOM_DJANGO_SECRET_KEY'
+```
+
+5. Rode o projeto em desenvolvimento: 
 ```
 python manage.py runserver
 ``` 

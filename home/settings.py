@@ -149,3 +149,11 @@ MESSAGE_TAGS = {
     constants.SUCCESS: "bg-green-50 text-green-700",
     constants.ERROR: "bg-red-50 text-red-700",
 }
+
+# Configurações de compatibilidade Render -> Nginx -> Django app
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS", 
+    cast=lambda v: [ origin.strip() for origin in v.split(", ") ], 
+    default=[], 
+)

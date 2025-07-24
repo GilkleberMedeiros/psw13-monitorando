@@ -146,6 +146,16 @@ def reunioes(request):
         data = request.POST["data"]
         data = datetime.strptime(data, r"%Y-%m-%dT%H:%M")
 
+        # Verifica se data do agendamento é menor que data atual - 1 hora
+        # (Data do agendamento deve sempre ser uma hora adiante da data atual).
+        if (data - timedelta(hours=1)) < datetime.now(): 
+            messages.add_message(
+                request, 
+                constants.ERROR, 
+                "Data do agendamento deve sempre ser uma hora adiante da data atual."
+            )
+            return redirect("reunioes")
+
         duracao_reuniao = DisponibilidadeHorario.duracao_reuniao
 
         horarios = DisponibilidadeHorario.objects.filter(mentor=request.user).filter(
